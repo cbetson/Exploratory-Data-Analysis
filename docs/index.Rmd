@@ -1,0 +1,150 @@
+---
+title: "Project"
+author: "Carsten Betson"
+date: "12/4/2021"
+output: html_document
+---
+# HW 4 - Receipts #
+```{r}
+library(readxl)
+Federal <- read_excel("C:\\Users\\carst\\OneDrive - Bowling Green State University\\BGSU Fall 2021\\Exploratory Data Analysis\\Project\\Project.xlsx")
+hist(Federal$Receipts)
+reexpressed.data.L <- data.frame(Federal[2] ^ (+.18))
+hist(reexpressed.data.L$Receipts)
+summary(reexpressed.data.L$Receipts)
+```
+
+# Outlays #
+```{r}
+hist(Federal$Outlays)
+reexpressed.data.L <- data.frame(Federal[3] ^ (+.15))
+hist(reexpressed.data.L$Outlays)
+summary(reexpressed.data.L$Outlays)
+```
+
+
+# HW 5 - Year vs Receipts #
+```{r}
+mod<-lm(Federal$Year~Federal$Receipts)
+plot(Federal$Year, Federal$Receipts,xlab="Year", ylab="Receipts", main="Year vs. Receipts")
+log.Y <- log10(Federal$Year)
+log.R <- log10(Federal$Receipts)
+plot(log.Y, log.R ,main="3 Groups and Summary Points")
+data <- data.frame(log.Y, log.R)
+sorted.data <- data[order(log.R), ]
+round(sorted.data, 2)
+abline(v=3.29299)
+abline(v=3.29814)
+s.points <- data.frame(x=c(3.29, 3.29625, 3.3),
+y=c(4.711,5.493,6.207))
+points(s.points, cex=2, pch=19, col="red")
+plot(log.Y,log.R,main="Resistant Line")
+curve(149.6 * (x - 3.29625) + 5.595,add=TRUE, col="blue")
+data=data.frame(log.Y, log.R)
+```
+
+# Year vs. Outlays#
+```{r}
+mod<-lm(Federal$Year~Federal$Outlays)
+plot(Federal$Year, Federal$Outlays,xlab="Year", ylab="Outlays", main="Year vs. Outlays")
+log.Y <- log10(Federal$Year)
+log.O <- log10(Federal$Outlays)
+plot(log.Y, log.O ,main="3 Groups and Summary Points")
+data <- data.frame(log.Y, log.O)
+sorted.data <- data[order(log.O), ]
+round(sorted.data, 2)
+abline(v=3.29299)
+abline(v=3.29814)
+s.points <- data.frame(x=c(3.29, 3.29625, 3.3),
+y=c(4.7865,5.5467,6.2665))
+points(s.points, cex=2, pch=19, col="red")
+plot(log.Y,log.O,main="Resistant Line")
+curve(148 * (x - 3.29625) +5.6566 ,add=TRUE, col="blue")
+data=data.frame(log.Y, log.O)
+```
+
+# Year vs. Surplus or Deficit#
+```{r}
+mod<-lm(Federal$Year~Federal$Surplus_or_Deficit)
+plot(Federal$Year, Federal$Surplus_or_Deficit,xlab="Year", ylab="Surplus or Deficit", main="Year vs. Surplus or Deficit")
+```
+
+# HW 6 - Year vs. Receipts #
+```{r}
+with(Federal,plot(Year, Receipts, main="Receipts per Year"))
+Federal[1:10,]
+Smooth3 <-c(NA, 14634, 24001, 43747, 43747, 39296, 39296, 39415, 39443, NA)
+cbind(Federal[1:10, ], Smooth3)
+smooth.3R <-smooth(Federal$Receipts, kind="3R")
+smooth.3R[1:12]
+with(Federal,plot(Year, smooth.3R,type="l",col="red",lwd=2,xlab="Year",ylab="Receipts",main="3R SMOOTH"))
+smooth.3RSS <-smooth(Federal$Receipts,kind="3RSS")
+with(Federal, plot(Year, smooth.3R,type="l",col="red",lwd=2,xlab="Year",ylab="Receipts",main="3R and 3RSS Smooths"))
+with(Federal,lines(Year, smooth.3RSS, col="blue"))
+legend("topleft",legend=c("3R", "3RSS"),lty=1, col=c("red", "blue"))
+han <- function (sequence) {
+  smooth <- stats::filter(sequence, 
+                          c(1, 2, 1)/4)
+  smooth[c(1, length(sequence))] <-
+    sequence[c(1, length(sequence))]
+  smooth
+}
+smooth.3RSSH <-han(smooth.3RSS)
+with(Federal,plot(Year, smooth.3RSSH, type="l",col="red",lwd=2,xlab="Year",  ylab="Receipts",main="3RSSH SMOOTH"))
+Rough <-with(Federal,Receipts - smooth.3RSSH)
+with(Federal,head(cbind(Receipts, smooth.3RSSH, Rough)))
+options(width=60)
+as.vector(Rough)
+smooth.3RS3R.twice <-smooth(Federal$Receipts,kind="3RS3R",  twiceit=TRUE)
+with(Federal,plot(Year, smooth.3RS3R.twice,col="red", lwd=2,  type="l",main="3RSSR, Twice Smooth"))
+FinalRough <- Federal$Receipts - smooth.3RS3R.twice
+plot(Federal$Year, FinalRough,pch=19, cex=1.3, xlab="Year", ylab="ROUGH", main="Final Rough")
+abline(h=0, lwd=3, col="blue")
+stem(abs(Rough))
+summary(abs(Rough))
+```
+
+# Year vs. Outlays #
+```{r}
+with(Federal,plot(Year, Outlays, main="Outlays per Year"))
+Federal[1:10,]
+Smooth3 <-c(NA, 35137, 78555, 91304, 91304, 55232, 34496, 34496, 38835, NA)
+cbind(Federal[1:10, ], Smooth3)
+smooth.3R <-smooth(Federal$Outlays, kind="3R")
+smooth.3R[1:12]
+with(Federal,plot(Year, smooth.3R,type="l",col="red",lwd=2,xlab="Year",ylab="Outlays",main="3R SMOOTH"))
+smooth.3RSS <-smooth(Federal$Outlays,kind="3RSS")
+with(Federal, plot(Year, smooth.3R,type="l",col="red",lwd=2,xlab="Year",ylab="Outlays",main="3R and 3RSS Smooths"))
+with(Federal,lines(Year, smooth.3RSS, col="blue"))
+legend("topleft",legend=c("3R", "3RSS"),lty=1, col=c("red", "blue"))
+han <- function (sequence) {
+  smooth <- stats::filter(sequence, 
+                          c(1, 2, 1)/4)
+  smooth[c(1, length(sequence))] <-
+    sequence[c(1, length(sequence))]
+  smooth
+}
+smooth.3RSSH <-han(smooth.3RSS)
+with(Federal,plot(Year, smooth.3RSSH, type="l",col="red",lwd=2,xlab="Year",  ylab="Outlays",main="3RSSH SMOOTH"))
+Rough <-with(Federal,Outlays - smooth.3RSSH)
+with(Federal,head(cbind(Outlays, smooth.3RSSH, Rough)))
+options(width=60)
+as.vector(Rough)
+smooth.3RS3R.twice <-smooth(Federal$Outlays,kind="3RS3R",  twiceit=TRUE)
+with(Federal,plot(Year, smooth.3RS3R.twice,col="red", lwd=2,  type="l",main="3RSSR, Twice Smooth"))
+FinalRough <- Federal$Outlays - smooth.3RS3R.twice
+plot(Federal$Year, FinalRough,pch=19, cex=1.3, xlab="Year", ylab="ROUGH", main="Final Rough")
+abline(h=0, lwd=3, col="blue")
+stem(abs(Rough))
+summary(abs(Rough))
+```
+
+# HW 8 - Receipts#
+#Histogram#
+```{r}
+bins <- seq(0, 2600000,5000)
+bin.mids <- (bins[-1] + bins[-length(bins)]) / 2
+with(Federal,
+hist(Receipts, breaks = bins, main = "Receipts"))
+```
+
